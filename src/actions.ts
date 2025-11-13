@@ -1,22 +1,292 @@
+import type { CompanionActionDefinition } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
+import { OscPaths } from './osc.js'
+
+export enum ActionId {
+	RecallPreset = 'recall_preset',
+	LoudnessMeter = 'loudness_meter',
+	MonitoringVolumeSet = 'monitoring_volume_set',
+	MonitoringDim = 'monitoring_dim',
+	MonitoringMute = 'monitoring_mute',
+	MonitoringHeadphonesEnable = 'monitoring_headphones_enable',
+	MonitoringInputSelect = 'monitoring_input_select',
+	MonitoringOutputSelect = 'monitoring_output_select',
+	TalkbackEnable = 'talkback_enable',
+	TalkbackSetMicGain = 'talkback_set_mic_gain',
+	DevicePhantomPower = 'device_phantom_power',
+}
 
 export function UpdateActions(self: ModuleInstance): void {
-	self.setActionDefinitions({
-		sample_action: {
-			name: 'My First Action',
+	const actions: { [id in ActionId]: CompanionActionDefinition } = {
+		[ActionId.RecallPreset]: {
+			name: 'Preset - Recall',
 			options: [
 				{
-					id: 'num',
+					id: 'number',
 					type: 'number',
-					label: 'Test',
-					default: 5,
+					label: 'Preset Number',
+					default: 0,
 					min: 0,
-					max: 100,
+					max: 0xffff,
+					isVisibleExpression: '!$(options:byName)',
+					range: true,
+					step: 1,
+				},
+				{
+					id: 'name',
+					type: 'textinput',
+					label: 'Preset Name',
+					default: '',
+					useVariables: { local: true },
+					isVisibleExpression: '$(options:byName)',
+				},
+				{
+					id: 'byName',
+					type: 'checkbox',
+					label: 'Recall by name',
+					default: false,
 				},
 			],
-			callback: async (event) => {
-				console.log('Hello world!', event.options.num)
+			callback: async (event, _context) => {
+				const preset = (event.options.byName ? event.options.name?.toString() : Number(event.options.number)) ?? 0
+				await self.sendMessage(OscPaths.PresetRecall(), preset)
 			},
 		},
-	})
+		[ActionId.LoudnessMeter]: {
+			name: 'Loudness Meter - Control',
+			options: [
+				{
+					id: 'appId',
+					type: 'number',
+					label: 'Application Id',
+					default: 0,
+					min: 0,
+					max: 0xffff,
+					isVisibleExpression: '!$(options:all)',
+					range: true,
+					step: 1,
+				},
+				{
+					id: 'all',
+					type: 'checkbox',
+					label: 'All Applications',
+					default: false,
+				},
+				{
+					id: 'action',
+					type: 'dropdown',
+					label: 'Action',
+					choices: [
+						{ id: 'start', label: 'Start' },
+						{ id: 'stop', label: 'Stop' },
+						{ id: 'reset', label: 'Reset' },
+					],
+					default: 'start',
+				},
+			],
+			callback: async (event, _context) => {
+				const appId = event.options.all ? 'all' : Number(event.options.appId)
+				let path = ''
+				switch (event.options.action) {
+					case 'start':
+						path = OscPaths.Metering.Start(appId)
+						break
+					case 'stop':
+						path = OscPaths.Metering.Stop(appId)
+						break
+					case 'reset':
+						path = OscPaths.Metering.Reset(appId)
+						break
+					default:
+						return
+				}
+				await self.sendMessage(path, '')
+			},
+		},
+		[ActionId.MonitoringVolumeSet]: {
+			name: 'Monitoring - Volume Set',
+			options: [
+				{
+					id: 'volume',
+					type: 'number',
+					label: 'Volume',
+					default: 0,
+					min: -0xffff,
+					max: 0xffff,
+					isVisibleExpression: '!$(options:ref)',
+				},
+				{
+					id: 'ref',
+					type: 'checkbox',
+					label: 'Reference Volume',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				let path = OscPaths.Monitoring.SetVolume()
+				const volume = Number(event.options.volume)
+				if (event.options.ref) path = OscPaths.Monitoring.RecallReferenceVolume()
+				await self.sendMessage(path, volume)
+			},
+		},
+		[ActionId.MonitoringDim]: {
+			name: 'Monitoring - Dim',
+			options: [
+				{
+					id: 'dim',
+					type: 'checkbox',
+					label: 'Dim',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Monitoring.Dim(), Boolean(event.options.dim).toString())
+			},
+		},
+		[ActionId.MonitoringMute]: {
+			name: 'Monitoring - Mute',
+			options: [
+				{
+					id: 'mute',
+					type: 'checkbox',
+					label: 'Mute',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Monitoring.Mute(), Boolean(event.options.mute).toString())
+			},
+		},
+		[ActionId.MonitoringHeadphonesEnable]: {
+			name: 'Monitoring - Headphones Enable',
+			options: [
+				{
+					id: 'enable',
+					type: 'checkbox',
+					label: 'Enable',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), Boolean(event.options.enable).toString())
+			},
+		},
+		[ActionId.MonitoringInputSelect]: {
+			name: 'Monitoring - Input Select',
+			options: [
+				{
+					id: 'input',
+					type: 'number',
+					label: 'Input',
+					default: 0,
+					min: 0,
+					max: 0xffff,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input)))
+			},
+		},
+		[ActionId.MonitoringOutputSelect]: {
+			name: 'Monitoring - Output Select',
+			options: [
+				{
+					id: 'output',
+					type: 'number',
+					label: 'Output',
+					default: 0,
+					min: 0,
+					max: 0xffff,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output)))
+			},
+		},
+		[ActionId.TalkbackSetMicGain]: {
+			name: 'Talkback - Set Mic Input Gain',
+			options: [
+				{
+					id: 'appId',
+					type: 'number',
+					label: 'Application Id',
+					default: 0,
+					min: 0,
+					max: 0xffff,
+					isVisibleExpression: '!$(options:all)',
+					range: true,
+					step: 1,
+				},
+				{
+					id: 'all',
+					type: 'checkbox',
+					label: 'All Applications',
+					default: false,
+				},
+				{
+					id: 'gain',
+					type: 'number',
+					label: 'Gain',
+					default: 0,
+					min: -12,
+					max: 12,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(
+					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Number(event.options.appId)),
+					Math.floor(Number(event.options.output)),
+				)
+			},
+		},
+		[ActionId.TalkbackEnable]: {
+			name: 'Talkback - Enable',
+			options: [
+				{
+					id: 'appId',
+					type: 'number',
+					label: 'Application Id',
+					default: 0,
+					min: 0,
+					max: 0xffff,
+					isVisibleExpression: '!$(options:all)',
+					range: true,
+					step: 1,
+				},
+				{
+					id: 'all',
+					type: 'checkbox',
+					label: 'All Applications',
+					default: false,
+				},
+				{
+					id: 'enable',
+					type: 'checkbox',
+					label: 'Enable',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(
+					OscPaths.Talkback.Enable(event.options.all ? 'all' : Number(event.options.appId)),
+					Boolean(event.options.enable).toString(),
+				)
+			},
+		},
+		[ActionId.DevicePhantomPower]: {
+			name: 'Device - Phjantom Power',
+			options: [
+				{
+					id: 'p48',
+					type: 'checkbox',
+					label: 'Phantom Power',
+					default: false,
+				},
+			],
+			callback: async (event, _context) => {
+				await self.sendMessage(OscPaths.Device.PhantomPower(), Boolean(event.options.p48).toString())
+			},
+		},
+	}
+	self.setActionDefinitions(actions)
 }
