@@ -28,7 +28,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		super(internal)
 	}
 
-	async init(config: ModuleConfig): Promise<void> {
+	public async init(config: ModuleConfig): Promise<void> {
 		this.config = config
 		this.statusManager.updateStatus(InstanceStatus.Connecting)
 
@@ -38,7 +38,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.configUpdated(config).catch(() => {})
 	}
 	// When module gets deleted
-	async destroy(): Promise<void> {
+	public async destroy(): Promise<void> {
 		this.debug(`destroy ${this.id}:${this.label}`)
 		this.queue.clear()
 		if (this.socket) this.socket.destroy()
@@ -46,7 +46,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.statusManager.destroy()
 	}
 
-	async configUpdated(config: ModuleConfig): Promise<void> {
+	public async configUpdated(config: ModuleConfig): Promise<void> {
 		this.debug(`Config Updated. ${JSON.stringify(config)}`)
 		this.queue.clear()
 		this.config = config
@@ -54,14 +54,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.createClient(config.host, config.port)
 	}
 
-	debug(msg: string | object): void {
+	private debug(msg: string | object): void {
 		if (this.config.verbose) {
 			if (typeof msg == 'object') msg = JSON.stringify(msg)
 			this.log('debug', `[${new Date().toJSON()}] ${msg}`)
 		}
 	}
 
-	async sendMessage(path: string, args: string | number | boolean): Promise<void> {
+	public async sendMessage(path: string, args: string | number | boolean): Promise<void> {
 		await this.queue.add(async (): Promise<boolean> => {
 			if (this.socket && this.socket.isConnected) {
 				const msg = new OSC.Message(path, args)
@@ -79,7 +79,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		})
 	}
 
-	kaMessage(): void {
+	private kaMessage(): void {
 		if (this.kaTimer) {
 			clearTimeout(this.kaTimer)
 		}
@@ -88,7 +88,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}, KA_INTERVAL)
 	}
 
-	createClient(host = this.config.host, port = this.config.port): void {
+	private createClient(host = this.config.host, port = this.config.port): void {
 		const connectEvent = () => {
 			this.log('info', ` Connected to ${host}:${port}`)
 			this.kaMessage()
@@ -125,19 +125,19 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 
 	// Return config fields for web config
-	getConfigFields(): SomeCompanionConfigField[] {
+	public getConfigFields(): SomeCompanionConfigField[] {
 		return GetConfigFields()
 	}
 
-	updateActions(): void {
+	private updateActions(): void {
 		UpdateActions(this)
 	}
 
-	updateFeedbacks(): void {
+	private updateFeedbacks(): void {
 		UpdateFeedbacks(this)
 	}
 
-	updateVariableDefinitions(): void {
+	private updateVariableDefinitions(): void {
 		UpdateVariableDefinitions(this)
 	}
 }
