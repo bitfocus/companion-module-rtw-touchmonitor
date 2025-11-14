@@ -1,6 +1,6 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
-import { OscPaths } from './osc.js'
+import { OscPaths } from './api.js'
 
 export enum ActionId {
 	RecallPreset = 'recall_preset',
@@ -27,10 +27,11 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Preset Number',
 					default: 0,
 					min: 0,
-					max: 0xffff,
+					max: 0xff,
 					isVisibleExpression: '!$(options:byName)',
 					range: true,
 					step: 1,
+					tooltip: 'Default preset is 0',
 				},
 				{
 					id: 'name',
@@ -39,6 +40,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					default: '',
 					useVariables: { local: true },
 					isVisibleExpression: '$(options:byName)',
+					tooltip: 'Case sensitive',
 				},
 				{
 					id: 'byName',
@@ -61,7 +63,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Application Id',
 					default: 0,
 					min: 0,
-					max: 0xffff,
+					max: 0xff,
 					isVisibleExpression: '!$(options:all)',
 					range: true,
 					step: 1,
@@ -71,6 +73,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'checkbox',
 					label: 'All Applications',
 					default: false,
+					tooltip: 'Apply command to all metering applications',
 				},
 				{
 					id: 'action',
@@ -111,8 +114,8 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'number',
 					label: 'Volume',
 					default: 0,
-					min: -0xffff,
-					max: 0xffff,
+					min: -0xff,
+					max: 0xff,
 					isVisibleExpression: '!$(options:ref)',
 				},
 				{
@@ -140,7 +143,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.Dim(), Boolean(event.options.dim).toString())
+				await self.sendMessage(OscPaths.Monitoring.Dim(), Boolean(event.options.dim))
 			},
 		},
 		[ActionId.MonitoringMute]: {
@@ -154,7 +157,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.Mute(), Boolean(event.options.mute).toString())
+				await self.sendMessage(OscPaths.Monitoring.Mute(), Boolean(event.options.mute))
 			},
 		},
 		[ActionId.MonitoringHeadphonesEnable]: {
@@ -168,7 +171,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), Boolean(event.options.enable).toString())
+				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), Boolean(event.options.enable))
 			},
 		},
 		[ActionId.MonitoringInputSelect]: {
@@ -178,13 +181,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					id: 'input',
 					type: 'number',
 					label: 'Input',
-					default: 0,
-					min: 0,
-					max: 0xffff,
+					default: 1,
+					min: 1,
+					max: 0xff,
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input)))
+				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input) - 1))
 			},
 		},
 		[ActionId.MonitoringOutputSelect]: {
@@ -194,13 +197,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					id: 'output',
 					type: 'number',
 					label: 'Output',
-					default: 0,
-					min: 0,
-					max: 0xffff,
+					default: 1,
+					min: 1,
+					max: 0xff,
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output)))
+				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output) - 1))
 			},
 		},
 		[ActionId.TalkbackSetMicGain]: {
@@ -212,7 +215,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Application Id',
 					default: 0,
 					min: 0,
-					max: 0xffff,
+					max: 0xff,
 					isVisibleExpression: '!$(options:all)',
 					range: true,
 					step: 1,
@@ -222,6 +225,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'checkbox',
 					label: 'All Applications',
 					default: false,
+					tooltip: 'Apply command to all metering applications',
 				},
 				{
 					id: 'gain',
@@ -235,7 +239,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			callback: async (event, _context) => {
 				await self.sendMessage(
 					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Number(event.options.appId)),
-					Math.floor(Number(event.options.output)),
+					Number(event.options.gain),
 				)
 			},
 		},
@@ -248,7 +252,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Application Id',
 					default: 0,
 					min: 0,
-					max: 0xffff,
+					max: 0xff,
 					isVisibleExpression: '!$(options:all)',
 					range: true,
 					step: 1,
@@ -258,6 +262,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'checkbox',
 					label: 'All Applications',
 					default: false,
+					tooltip: 'Apply command to all metering applications',
 				},
 				{
 					id: 'enable',
