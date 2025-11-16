@@ -279,7 +279,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 		[ActionId.DevicePhantomPower]: {
-			name: 'Device - Phjantom Power',
+			name: 'Device - Phantom Power',
 			options: [
 				{
 					id: 'p48',
