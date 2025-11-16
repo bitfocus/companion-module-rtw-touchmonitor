@@ -16,7 +16,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/phillipivan/companion-module-rtw-tm5.git"
+		"url": "git+https://github.com/bitfocus/companion-module-rtw-touchmonitor.git"
 	},
 	"engines": {
 		"node": "^22.20",
