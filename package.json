@@ -24,9 +24,9 @@
 	},
 	"dependencies": {
 		"@companion-module/base": "~1.13.4",
-		"es-toolkit": "^1.41.0",
+		"es-toolkit": "^1.42.0",
 		"osc-js": "^2.4.1",
-		"p-queue": "^9.0.0"
+		"p-queue": "^9.0.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.4.2",
@@ -37,7 +37,7 @@
 		"prettier": "^3.6.2",
 		"rimraf": "^6.1.0",
 		"typescript": "~5.9.3",
-		"typescript-eslint": "^8.46.4"
+		"typescript-eslint": "^8.47.0"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json",
 	"lint-staged": {
