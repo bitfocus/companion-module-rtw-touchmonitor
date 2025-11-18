@@ -1,4 +1,4 @@
-import type { CompanionActionDefinition } from '@companion-module/base'
+import type { CompanionActionDefinition, SomeCompanionActionInputField } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
 import { OscPaths } from './api.js'
 
@@ -14,6 +14,41 @@ export enum ActionId {
 	TalkbackEnable = 'talkback_enable',
 	TalkbackSetMicGain = 'talkback_set_mic_gain',
 	DevicePhantomPower = 'device_phantom_power',
+}
+
+const ApplicationIdOption: SomeCompanionActionInputField = {
+	id: 'appId',
+	type: 'number',
+	label: 'Application Id',
+	default: 0,
+	min: 0,
+	max: 0xff,
+	isVisibleExpression: '!$(options:all)',
+	range: true,
+	step: 1,
+}
+
+const ApplicationIdPlaceholderOption: SomeCompanionActionInputField = {
+	id: 'placeholder',
+	type: 'static-text',
+	label: 'Application Id',
+	value: 'All',
+	isVisibleExpression: '$(options:all)',
+}
+
+const AllApplicationsOption: SomeCompanionActionInputField = {
+	id: 'all',
+	type: 'checkbox',
+	label: 'All Applications',
+	default: false,
+	tooltip: 'Apply command to all metering applications',
+}
+
+const EnableOption: SomeCompanionActionInputField = {
+	id: 'enable',
+	type: 'checkbox',
+	label: 'Enable',
+	default: false,
 }
 
 export function UpdateActions(self: ModuleInstance): void {
@@ -57,31 +92,9 @@ export function UpdateActions(self: ModuleInstance): void {
 		[ActionId.LoudnessMeter]: {
 			name: 'Loudness Meter - Control',
 			options: [
-				{
-					id: 'appId',
-					type: 'number',
-					label: 'Application Id',
-					default: 0,
-					min: 0,
-					max: 0xff,
-					isVisibleExpression: '!$(options:all)',
-					range: true,
-					step: 1,
-				},
-				{
-					id: 'placeholder',
-					type: 'static-text',
-					label: 'Application Id',
-					value: 'All',
-					isVisibleExpression: '$(options:all)',
-				},
-				{
-					id: 'all',
-					type: 'checkbox',
-					label: 'All Applications',
-					default: false,
-					tooltip: 'Apply command to all metering applications',
-				},
+				ApplicationIdOption,
+				ApplicationIdPlaceholderOption,
+				AllApplicationsOption,
 				{
 					id: 'action',
 					type: 'dropdown',
@@ -176,14 +189,7 @@ export function UpdateActions(self: ModuleInstance): void {
 		},
 		[ActionId.MonitoringHeadphonesEnable]: {
 			name: 'Monitoring - Headphones Enable',
-			options: [
-				{
-					id: 'enable',
-					type: 'checkbox',
-					label: 'Enable',
-					default: false,
-				},
-			],
+			options: [EnableOption],
 			callback: async (event, _context) => {
 				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), Boolean(event.options.enable))
 			},
@@ -227,31 +233,9 @@ export function UpdateActions(self: ModuleInstance): void {
 		[ActionId.TalkbackSetMicGain]: {
 			name: 'Talkback - Set Mic Input Gain',
 			options: [
-				{
-					id: 'appId',
-					type: 'number',
-					label: 'Application Id',
-					default: 0,
-					min: 0,
-					max: 0xff,
-					isVisibleExpression: '!$(options:all)',
-					range: true,
-					step: 1,
-				},
-				{
-					id: 'placeholder',
-					type: 'static-text',
-					label: 'Application Id',
-					value: 'All',
-					isVisibleExpression: '$(options:all)',
-				},
-				{
-					id: 'all',
-					type: 'checkbox',
-					label: 'All Applications',
-					default: false,
-					tooltip: 'Apply command to all metering applications',
-				},
+				ApplicationIdOption,
+				ApplicationIdPlaceholderOption,
+				AllApplicationsOption,
 				{
 					id: 'gain',
 					type: 'number',
@@ -273,39 +257,7 @@ export function UpdateActions(self: ModuleInstance): void {
 		},
 		[ActionId.TalkbackEnable]: {
 			name: 'Talkback - Enable',
-			options: [
-				{
-					id: 'appId',
-					type: 'number',
-					label: 'Application Id',
-					default: 0,
-					min: 0,
-					max: 0xff,
-					isVisibleExpression: '!$(options:all)',
-					range: true,
-					step: 1,
-				},
-				{
-					id: 'placeholder',
-					type: 'static-text',
-					label: 'Application Id',
-					value: 'All',
-					isVisibleExpression: '$(options:all)',
-				},
-				{
-					id: 'all',
-					type: 'checkbox',
-					label: 'All Applications',
-					default: false,
-					tooltip: 'Apply command to all metering applications',
-				},
-				{
-					id: 'enable',
-					type: 'checkbox',
-					label: 'Enable',
-					default: false,
-				},
-			],
+			options: [ApplicationIdOption, ApplicationIdPlaceholderOption, AllApplicationsOption, EnableOption],
 			callback: async (event, _context) => {
 				await self.sendMessage(
 					OscPaths.Talkback.Enable(event.options.all ? 'all' : Number(event.options.appId)),
