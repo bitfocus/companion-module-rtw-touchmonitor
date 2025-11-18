@@ -31,7 +31,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					isVisibleExpression: '!$(options:byName)',
 					range: true,
 					step: 1,
-					tooltip: 'Default preset is 0',
+					description: 'Default preset is 0',
 				},
 				{
 					id: 'name',
@@ -40,7 +40,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					default: '',
 					useVariables: { local: true },
 					isVisibleExpression: '$(options:byName)',
-					tooltip: 'Case sensitive',
+					description: 'Case sensitive',
 				},
 				{
 					id: 'byName',
@@ -67,6 +67,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					isVisibleExpression: '!$(options:all)',
 					range: true,
 					step: 1,
+				},
+				{
+					id: 'placeholder',
+					type: 'static-text',
+					label: 'Application Id',
+					value: 'All',
+					isVisibleExpression: '$(options:all)',
 				},
 				{
 					id: 'all',
@@ -117,6 +124,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					min: -0xff,
 					max: 0xff,
 					isVisibleExpression: '!$(options:ref)',
+				},
+				{
+					id: 'placeholder',
+					type: 'static-text',
+					label: 'Volume',
+					value: 'Reference',
+					isVisibleExpression: '$(options:ref)',
 				},
 				{
 					id: 'ref',
@@ -184,6 +198,8 @@ export function UpdateActions(self: ModuleInstance): void {
 					default: 1,
 					min: 1,
 					max: 0xff,
+					range: true,
+					step: 1,
 				},
 			],
 			callback: async (event, _context) => {
@@ -200,6 +216,8 @@ export function UpdateActions(self: ModuleInstance): void {
 					default: 1,
 					min: 1,
 					max: 0xff,
+					range: true,
+					step: 1,
 				},
 			],
 			callback: async (event, _context) => {
@@ -221,6 +239,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					step: 1,
 				},
 				{
+					id: 'placeholder',
+					type: 'static-text',
+					label: 'Application Id',
+					value: 'All',
+					isVisibleExpression: '$(options:all)',
+				},
+				{
 					id: 'all',
 					type: 'checkbox',
 					label: 'All Applications',
@@ -234,6 +259,9 @@ export function UpdateActions(self: ModuleInstance): void {
 					default: 0,
 					min: -12,
 					max: 12,
+					range: true,
+					step: 0.1,
+					description: 'Range: -12 to +12 dB',
 				},
 			],
 			callback: async (event, _context) => {
@@ -256,6 +284,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					isVisibleExpression: '!$(options:all)',
 					range: true,
 					step: 1,
+				},
+				{
+					id: 'placeholder',
+					type: 'static-text',
+					label: 'Application Id',
+					value: 'All',
+					isVisibleExpression: '$(options:all)',
 				},
 				{
 					id: 'all',
