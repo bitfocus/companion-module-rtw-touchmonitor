@@ -94,7 +94,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	private createClient(host = this.config.host, port = this.config.port): void {
 		const connectEvent = () => {
-			this.log('info', ` Connected to ${host}:${port}`)
+			this.log('info', `Connected to ${host}:${port}`)
 			this.kaMessage()
 		}
 		const dataEvent = (msg: Buffer<ArrayBufferLike>) => {
