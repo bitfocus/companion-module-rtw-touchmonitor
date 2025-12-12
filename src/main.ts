@@ -17,6 +17,7 @@ import OSC from 'osc-js'
 const KA_INTERVAL = 30000
 const KA_MESSAGE_PATH = ''
 const KA_MESSAGE_ARGS = ''
+const KA_MESSAGE_PRIO = 0
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	private config!: ModuleConfig // Setup in init()
@@ -61,22 +62,25 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
-	public async sendMessage(path: string, args: string | number | boolean): Promise<void> {
-		await this.queue.add(async (): Promise<boolean> => {
-			if (this.socket && this.socket.isConnected) {
-				const msg = new OSC.Message(path, args)
-				const packet = new OSC.Packet(msg)
-				const sent = await this.socket.send(Buffer.from(packet.pack()))
-				this.kaMessage()
-				this.debug(sent ? `Message sent: ${JSON.stringify(msg)}` : `Could not send: ${JSON.stringify(msg)}`)
-				return sent
-			}
-			this.log(
-				'warn',
-				`Socket not connected! could not send message to host ${this.config.host}\n Path: ${path}. Arguments: ${args}`,
-			)
-			return false
-		})
+	public async sendMessage(path: string, args: string | number | boolean, priority: number = 1): Promise<boolean> {
+		return await this.queue.add(
+			async (): Promise<boolean> => {
+				if (this.socket && this.socket.isConnected) {
+					const msg = new OSC.Message(path, args)
+					const packet = new OSC.Packet(msg)
+					const sent = await this.socket.send(Buffer.from(packet.pack()))
+					this.kaMessage()
+					this.debug(sent ? `Message sent: ${JSON.stringify(msg)}` : `Could not send: ${JSON.stringify(msg)}`)
+					return sent
+				}
+				this.log(
+					'warn',
+					`Socket not connected! could not send message to host ${this.config.host}\n Path: ${path}. Arguments: ${args}`,
+				)
+				return false
+			},
+			{ priority: priority },
+		)
 	}
 
 	private kaMessage(): void {
@@ -84,7 +88,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			clearTimeout(this.kaTimer)
 		}
 		this.kaTimer = setTimeout(() => {
-			this.sendMessage(KA_MESSAGE_PATH, KA_MESSAGE_ARGS).catch(() => {})
+			this.sendMessage(KA_MESSAGE_PATH, KA_MESSAGE_ARGS, KA_MESSAGE_PRIO).catch(() => {})
 		}, KA_INTERVAL)
 	}
 
@@ -112,7 +116,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 		if (host) {
 			this.debug(`Creating new socket to ${host}:${port}`)
-			this.socket = new TCPHelper(host, port, { reconnect: false })
+			this.socket = new TCPHelper(host, port, { reconnect: true, reconnect_interval: 5000 })
 			this.socket.on('connect', connectEvent)
 			this.socket.on('data', dataEvent)
 			this.socket.on('end', endEvent)
