@@ -14,6 +14,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			label: 'Host',
 			width: 8,
 			regex: Regex.HOSTNAME,
+			required: true,
 		},
 		{
 			type: 'number',
