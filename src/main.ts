@@ -58,7 +58,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	private debug(msg: string | object): void {
 		if (this.config.verbose) {
 			if (typeof msg == 'object') msg = JSON.stringify(msg)
-			this.log('debug', `[${new Date().toJSON()}] ${msg}`)
+			this.log('debug', msg)
 		}
 	}
 
