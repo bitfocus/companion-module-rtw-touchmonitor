@@ -16,7 +16,7 @@ export enum ActionId {
 	DevicePhantomPower = 'device_phantom_power',
 }
 
-const ApplicationIdOption: SomeCompanionActionInputField = {
+const ApplicationIdOption = {
 	id: 'appId',
 	type: 'number',
 	label: 'Application Id',
@@ -26,30 +26,30 @@ const ApplicationIdOption: SomeCompanionActionInputField = {
 	isVisibleExpression: '!$(options:all)',
 	range: true,
 	step: 1,
-}
+} as const satisfies SomeCompanionActionInputField
 
-const ApplicationIdPlaceholderOption: SomeCompanionActionInputField = {
+const ApplicationIdPlaceholderOption = {
 	id: 'placeholder',
 	type: 'static-text',
 	label: 'Application Id',
 	value: 'All',
 	isVisibleExpression: '$(options:all)',
-}
+} as const satisfies SomeCompanionActionInputField
 
-const AllApplicationsOption: SomeCompanionActionInputField = {
+const AllApplicationsOption = {
 	id: 'all',
 	type: 'checkbox',
 	label: 'All Applications',
 	default: false,
 	tooltip: 'Apply command to all metering applications',
-}
+} as const satisfies SomeCompanionActionInputField
 
-const EnableOption: SomeCompanionActionInputField = {
+const EnableOption = {
 	id: 'enable',
 	type: 'checkbox',
 	label: 'Enable',
 	default: false,
-}
+} as const satisfies SomeCompanionActionInputField
 
 export function UpdateActions(self: ModuleInstance): void {
 	const actions: { [id in ActionId]: CompanionActionDefinition } = {
@@ -86,7 +86,8 @@ export function UpdateActions(self: ModuleInstance): void {
 			],
 			callback: async (event, _context) => {
 				const preset = (event.options.byName ? event.options.name?.toString() : Number(event.options.number)) ?? 0
-				await self.sendMessage(OscPaths.PresetRecall(), preset)
+				const type = event.options.byName ? 's' : 'i'
+				await self.sendMessage(OscPaths.PresetRecall(), preset, type)
 			},
 		},
 		[ActionId.LoudnessMeter]: {
@@ -156,7 +157,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				let path = OscPaths.Monitoring.SetVolume()
 				const volume = Number(event.options.volume)
 				if (event.options.ref) path = OscPaths.Monitoring.RecallReferenceVolume()
-				await self.sendMessage(path, volume)
+				await self.sendMessage(path, volume, 'f')
 			},
 		},
 		[ActionId.MonitoringDim]: {
@@ -209,7 +210,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input) - 1))
+				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input) - 1), 'i')
 			},
 		},
 		[ActionId.MonitoringOutputSelect]: {
@@ -227,7 +228,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output) - 1))
+				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output) - 1), 'i')
 			},
 		},
 		[ActionId.TalkbackSetMicGain]: {
@@ -252,6 +253,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				await self.sendMessage(
 					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Number(event.options.appId)),
 					Number(event.options.gain),
+					'f',
 				)
 			},
 		},

@@ -11,6 +11,7 @@ import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { StatusManager } from './status.js'
+import { OscArgTypes } from './types.js'
 import PQueue from 'p-queue'
 import OSC from 'osc-js'
 
@@ -62,15 +63,26 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
-	public async sendMessage(path: string, args: string | number | boolean, priority: number = 1): Promise<boolean> {
+	public async sendMessage(
+		path: string,
+		args: string | number | boolean,
+		type?: OscArgTypes,
+		priority: number = 1,
+	): Promise<boolean> {
 		return await this.queue.add(
 			async (): Promise<boolean> => {
 				if (this.socket && this.socket.isConnected) {
 					const msg = new OSC.Message(path, args)
 					const packet = new OSC.Packet(msg)
-					const sent = await this.socket.send(Buffer.from(packet.pack()))
+					if (type) msg.types = type
+					const PackedMsgBuffer = Buffer.from(packet.pack())
+					const sent = await this.socket.send(PackedMsgBuffer)
 					this.kaMessage()
-					this.debug(sent ? `Message sent: ${JSON.stringify(msg)}` : `Could not send: ${JSON.stringify(msg)}`)
+					this.debug(
+						sent
+							? `Message sent: ${JSON.stringify(msg)}\n Message buffer: ${PackedMsgBuffer}`
+							: `Could not send: ${JSON.stringify(msg)}`,
+					)
 					return sent
 				}
 				this.log(
@@ -88,7 +100,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			clearTimeout(this.kaTimer)
 		}
 		this.kaTimer = setTimeout(() => {
-			this.sendMessage(KA_MESSAGE_PATH, KA_MESSAGE_ARGS, KA_MESSAGE_PRIO).catch(() => {})
+			this.sendMessage(KA_MESSAGE_PATH, KA_MESSAGE_ARGS, '', KA_MESSAGE_PRIO).catch(() => {})
 		}, KA_INTERVAL)
 	}
 
