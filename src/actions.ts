@@ -87,7 +87,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			callback: async (event, _context) => {
 				const preset = (event.options.byName ? event.options.name?.toString() : Number(event.options.number)) ?? 0
 				const type = event.options.byName ? 's' : 'i'
-				await self.sendMessage(OscPaths.PresetRecall(), preset, type)
+				await self.sendMessage(OscPaths.Preset.Recall(), preset, type)
 			},
 		},
 		[ActionId.LoudnessMeter]: {
