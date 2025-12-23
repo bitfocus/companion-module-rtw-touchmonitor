@@ -52,7 +52,6 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.debug(`Config Updated. ${JSON.stringify(config)}`)
 		this.queue.clear()
 		this.config = config
-		process.title = this.label
 		this.createClient(config.host, config.port)
 	}
 
@@ -69,6 +68,12 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		type?: OscArgTypes,
 		priority: number = 1,
 	): Promise<boolean> {
+		/* 		const numberToUint32Buffer = (value: number): ArrayBuffer => {
+			const uint32Array = new Uint32Array(1)
+			uint32Array[0] = value
+			return uint32Array.buffer	
+		} */
+		this.debug(`Queueing message to ${path} with args: ${args} and type: ${type} at priority ${priority}`)
 		return await this.queue.add(
 			async (): Promise<boolean> => {
 				if (this.socket && this.socket.isConnected) {
@@ -76,11 +81,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 					const packet = new OSC.Packet(msg)
 					if (type) msg.types = type
 					const PackedMsgBuffer = Buffer.from(packet.pack())
-					const sent = await this.socket.send(PackedMsgBuffer)
+					//const msgSize = numberToUint32Buffer(PackedMsgBuffer.length)
+					const msgSize = PackedMsgBuffer.length.toString(10).padStart(4, '0')
+					const msgBuffer = Buffer.concat([Buffer.from(msgSize), PackedMsgBuffer])
+					const sent = await this.socket.send(msgBuffer)
 					this.kaMessage()
 					this.debug(
 						sent
-							? `Message sent: ${JSON.stringify(msg)}\n Message buffer: ${PackedMsgBuffer}`
+							? `Message sent: ${JSON.stringify(msg)}\n Message buffer: ${msgBuffer.toString('hex')}`
 							: `Could not send: ${JSON.stringify(msg)}`,
 					)
 					return sent
