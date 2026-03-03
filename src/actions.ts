@@ -1,6 +1,7 @@
-import type { CompanionActionDefinition, SomeCompanionActionInputField } from '@companion-module/base'
+import type { CompanionActionDefinition, OSCMetaArgument, SomeCompanionActionInputField } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
 import { OscPaths } from './api.js'
+import { assertOSCMetaArgument } from './utils.js'
 
 export enum ActionId {
 	RecallPreset = 'recall_preset',
@@ -62,7 +63,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Preset Number',
 					default: 0,
 					min: 0,
-					max: 0xff,
+					max: 0x20,
 					isVisibleExpression: '!$(options:byName)',
 					range: true,
 					step: 1,
@@ -86,8 +87,9 @@ export function UpdateActions(self: ModuleInstance): void {
 			],
 			callback: async (event, _context) => {
 				const preset = (event.options.byName ? event.options.name?.toString() : Number(event.options.number)) ?? 0
-				const type = event.options.byName ? 's' : 'i'
-				await self.sendMessage(OscPaths.Preset.Recall(), preset, type)
+				const args = { type: typeof preset == 'string' ? 's' : 'i', value: preset }
+				assertOSCMetaArgument(args)
+				await self.sendMessage(OscPaths.Preset.Recall(), args)
 			},
 		},
 		[ActionId.LoudnessMeter]: {
@@ -124,7 +126,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					default:
 						return
 				}
-				await self.sendMessage(path, '')
+				await self.sendMessage(path, [])
 			},
 		},
 		[ActionId.MonitoringVolumeSet]: {
@@ -157,7 +159,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				let path = OscPaths.Monitoring.SetVolume()
 				const volume = Number(event.options.volume)
 				if (event.options.ref) path = OscPaths.Monitoring.RecallReferenceVolume()
-				await self.sendMessage(path, volume, 'f')
+				const args: OSCMetaArgument = { type: 'f', value: volume }
+				await self.sendMessage(path, args)
 			},
 		},
 		[ActionId.MonitoringDim]: {
@@ -171,7 +174,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.Dim(), Boolean(event.options.dim))
+				const args: OSCMetaArgument = { type: 's', value: String(event.options.dim) }
+				await self.sendMessage(OscPaths.Monitoring.Dim(), args)
 			},
 		},
 		[ActionId.MonitoringMute]: {
@@ -185,14 +189,16 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.Mute(), Boolean(event.options.mute))
+				const args: OSCMetaArgument = { type: 's', value: String(event.options.mute) }
+				await self.sendMessage(OscPaths.Monitoring.Mute(), args)
 			},
 		},
 		[ActionId.MonitoringHeadphonesEnable]: {
 			name: 'Monitoring - Headphones Enable',
 			options: [EnableOption],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), Boolean(event.options.enable))
+				const args: OSCMetaArgument = { type: 's', value: String(event.options.enable) }
+				await self.sendMessage(OscPaths.Monitoring.EnableHeadphones(), args)
 			},
 		},
 		[ActionId.MonitoringInputSelect]: {
@@ -210,7 +216,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectInput(), Math.floor(Number(event.options.input) - 1), 'i')
+				const args: OSCMetaArgument = { type: 'i', value: Math.floor(Number(event.options.input) - 1) }
+				await self.sendMessage(OscPaths.Monitoring.SelectInput(), args)
 			},
 		},
 		[ActionId.MonitoringOutputSelect]: {
@@ -228,7 +235,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), Math.floor(Number(event.options.output) - 1), 'i')
+				const args: OSCMetaArgument = { type: 'i', value: Math.floor(Number(event.options.output) - 1) }
+				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), args)
 			},
 		},
 		[ActionId.TalkbackSetMicGain]: {
@@ -250,10 +258,10 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
+				const args: OSCMetaArgument = { type: 'f', value: Math.floor(Number(event.options.gain)) }
 				await self.sendMessage(
 					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Number(event.options.appId)),
-					Number(event.options.gain),
-					'f',
+					args,
 				)
 			},
 		},
@@ -261,10 +269,8 @@ export function UpdateActions(self: ModuleInstance): void {
 			name: 'Talkback - Enable',
 			options: [ApplicationIdOption, ApplicationIdPlaceholderOption, AllApplicationsOption, EnableOption],
 			callback: async (event, _context) => {
-				await self.sendMessage(
-					OscPaths.Talkback.Enable(event.options.all ? 'all' : Number(event.options.appId)),
-					Boolean(event.options.enable).toString(),
-				)
+				const args: OSCMetaArgument = { type: 's', value: String(event.options.enable) }
+				await self.sendMessage(OscPaths.Talkback.Enable(event.options.all ? 'all' : Number(event.options.appId)), args)
 			},
 		},
 		[ActionId.DevicePhantomPower]: {
@@ -278,7 +284,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				await self.sendMessage(OscPaths.Device.PhantomPower(), Boolean(event.options.p48).toString())
+				const args: OSCMetaArgument = { type: 's', value: String(event.options.p48) }
+				await self.sendMessage(OscPaths.Device.PhantomPower(), args)
 			},
 		},
 	}

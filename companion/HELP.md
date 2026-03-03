@@ -2,9 +2,11 @@
 
 Compatible with TMxCore, TouchControl 5, TouchMonitor 5
 
+Minimum supported firmware 2.1.18
+
 ### Actions
 
-Preset - Recall
+Device - Phantom Power
 Loudness Meter - Control
 Monitoring - Volume Set
 Monitoring - Dim
@@ -12,6 +14,6 @@ Monitoring - Mute
 Monitoring - Headphones Enable
 Monitoring - Input Select
 Monitoring - Output Select
+Preset - Recall
 Talkback - Enable
 Talkback - Set Mic Gain
-Device - Phantom Power
