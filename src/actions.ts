@@ -343,7 +343,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 				},
 			],
 			callback: async (event, _context) => {
-				const args: OSCMetaArgument = { type: 'f', value: Math.floor(event.options.gain) }
+				const args: OSCMetaArgument = { type: 'f', value: event.options.gain }
 				await self.sendMessage(
 					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Math.floor(event.options.appId)),
 					args,
