@@ -159,7 +159,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 				},
 			],
 			callback: async (event, _context) => {
-				const preset = event.options.byName ? event.options.name?.toString() : event.options.number
+				const preset = event.options.byName ? event.options.name?.toString() : Math.floor(event.options.number)
 				const args = { type: typeof preset == 'string' ? 's' : 'i', value: preset }
 				assertOSCMetaArgument(args)
 				await self.sendMessage(OscPaths.Preset.Recall(), args)
@@ -332,7 +332,10 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 			],
 			callback: async (event, _context) => {
 				const args: OSCMetaArgument = { type: 'f', value: Math.floor(event.options.gain) }
-				await self.sendMessage(OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : event.options.appId), args)
+				await self.sendMessage(
+					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Math.floor(event.options.appId)),
+					args,
+				)
 			},
 		},
 		[ActionId.TalkbackEnable]: {
@@ -340,7 +343,10 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 			options: [ApplicationIdOption, ApplicationIdPlaceholderOption, AllApplicationsOption, EnableOption],
 			callback: async (event, _context) => {
 				const args: OSCMetaArgument = { type: 's', value: String(event.options.enable) }
-				await self.sendMessage(OscPaths.Talkback.Enable(event.options.all ? 'all' : event.options.appId), args)
+				await self.sendMessage(
+					OscPaths.Talkback.Enable(event.options.all ? 'all' : Math.floor(event.options.appId)),
+					args,
+				)
 			},
 		},
 		[ActionId.DevicePhantomPower]: {
