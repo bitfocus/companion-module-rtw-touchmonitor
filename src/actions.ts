@@ -1,4 +1,10 @@
-import type { CompanionActionDefinitions, OSCMetaArgument, SomeCompanionActionInputField } from '@companion-module/base'
+import type {
+	CompanionActionDefinitions,
+	CompanionInputFieldCheckbox,
+	CompanionInputFieldNumber,
+	CompanionInputFieldStaticText,
+	OSCMetaArgument,
+} from '@companion-module/base'
 import type ModuleInstance from './main.js'
 import { OscPaths } from './api.js'
 import { assertOSCMetaArgument } from './utils.js'
@@ -98,7 +104,7 @@ const ApplicationIdOption = {
 	isVisibleExpression: '!$(options:all)',
 	range: true,
 	step: 1,
-} as const satisfies SomeCompanionActionInputField
+} as const satisfies CompanionInputFieldNumber
 
 const ApplicationIdPlaceholderOption = {
 	id: 'placeholder',
@@ -106,7 +112,8 @@ const ApplicationIdPlaceholderOption = {
 	label: 'Application Id',
 	value: 'All',
 	isVisibleExpression: '$(options:all)',
-} as const satisfies SomeCompanionActionInputField
+	disableAutoExpression: true,
+} as const satisfies CompanionInputFieldStaticText
 
 const AllApplicationsOption = {
 	id: 'all',
@@ -115,14 +122,14 @@ const AllApplicationsOption = {
 	default: false,
 	tooltip: 'Apply command to all metering applications',
 	disableAutoExpression: true,
-} as const satisfies SomeCompanionActionInputField
+} as const satisfies CompanionInputFieldCheckbox
 
 const EnableOption = {
 	id: 'enable',
 	type: 'checkbox',
 	label: 'Enable',
 	default: false,
-} as const satisfies SomeCompanionActionInputField
+} as const satisfies CompanionInputFieldCheckbox
 
 export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<ActionSchema> {
 	const actions: CompanionActionDefinitions<ActionSchema> = {
@@ -223,6 +230,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					label: 'Volume',
 					value: 'Reference',
 					isVisibleExpression: '$(options:ref)',
+					disableAutoExpression: true,
 				},
 				{
 					id: 'ref',
