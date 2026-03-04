@@ -1,5 +1,5 @@
-import type { CompanionActionDefinition, OSCMetaArgument, SomeCompanionActionInputField } from '@companion-module/base'
-import type { ModuleInstance } from './main.js'
+import type { CompanionActionDefinitions, OSCMetaArgument, SomeCompanionActionInputField } from '@companion-module/base'
+import type ModuleInstance from './main.js'
 import { OscPaths } from './api.js'
 import { assertOSCMetaArgument } from './utils.js'
 
@@ -15,6 +15,77 @@ export enum ActionId {
 	TalkbackEnable = 'talkback_enable',
 	TalkbackSetMicGain = 'talkback_set_mic_gain',
 	DevicePhantomPower = 'device_phantom_power',
+}
+
+export type ActionSchema = {
+	[ActionId.RecallPreset]: {
+		options: {
+			number: number
+			name: string
+			byName: boolean
+		}
+	}
+	[ActionId.LoudnessMeter]: {
+		options: {
+			appId: number
+			placeholder: never
+			all: boolean
+			action: 'start' | 'stop' | 'reset'
+		}
+	}
+	[ActionId.MonitoringVolumeSet]: {
+		options: {
+			volume: number
+			placeholder: never
+			ref: boolean
+		}
+	}
+	[ActionId.MonitoringDim]: {
+		options: {
+			dim: boolean
+		}
+	}
+	[ActionId.MonitoringMute]: {
+		options: {
+			mute: boolean
+		}
+	}
+	[ActionId.MonitoringHeadphonesEnable]: {
+		options: {
+			enable: boolean
+		}
+	}
+	[ActionId.MonitoringInputSelect]: {
+		options: {
+			input: number
+		}
+	}
+	[ActionId.MonitoringOutputSelect]: {
+		options: {
+			output: number
+		}
+	}
+	[ActionId.TalkbackSetMicGain]: {
+		options: {
+			appId: number
+			placeholder: never
+			all: boolean
+			gain: number
+		}
+	}
+	[ActionId.TalkbackEnable]: {
+		options: {
+			appId: number
+			placeholder: never
+			all: boolean
+			enable: boolean
+		}
+	}
+	[ActionId.DevicePhantomPower]: {
+		options: {
+			p48: boolean
+		}
+	}
 }
 
 const ApplicationIdOption = {
@@ -43,6 +114,7 @@ const AllApplicationsOption = {
 	label: 'All Applications',
 	default: false,
 	tooltip: 'Apply command to all metering applications',
+	disableAutoExpression: true,
 } as const satisfies SomeCompanionActionInputField
 
 const EnableOption = {
@@ -52,8 +124,8 @@ const EnableOption = {
 	default: false,
 } as const satisfies SomeCompanionActionInputField
 
-export function UpdateActions(self: ModuleInstance): void {
-	const actions: { [id in ActionId]: CompanionActionDefinition } = {
+export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<ActionSchema> {
+	const actions: CompanionActionDefinitions<ActionSchema> = {
 		[ActionId.RecallPreset]: {
 			name: 'Preset - Recall',
 			options: [
@@ -74,7 +146,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'textinput',
 					label: 'Preset Name',
 					default: '',
-					useVariables: { local: true },
+					useVariables: true,
 					isVisibleExpression: '$(options:byName)',
 					description: 'Case sensitive',
 				},
@@ -83,10 +155,11 @@ export function UpdateActions(self: ModuleInstance): void {
 					type: 'checkbox',
 					label: 'Recall by name',
 					default: false,
+					disableAutoExpression: true,
 				},
 			],
 			callback: async (event, _context) => {
-				const preset = (event.options.byName ? event.options.name?.toString() : Number(event.options.number)) ?? 0
+				const preset = event.options.byName ? event.options.name?.toString() : event.options.number
 				const args = { type: typeof preset == 'string' ? 's' : 'i', value: preset }
 				assertOSCMetaArgument(args)
 				await self.sendMessage(OscPaths.Preset.Recall(), args)
@@ -111,7 +184,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				const appId = event.options.all ? 'all' : Number(event.options.appId)
+				const appId = event.options.all ? 'all' : event.options.appId
 				let path = ''
 				switch (event.options.action) {
 					case 'start':
@@ -157,7 +230,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			],
 			callback: async (event, _context) => {
 				let path = OscPaths.Monitoring.SetVolume()
-				const volume = Number(event.options.volume)
+				const volume = event.options.volume
 				if (event.options.ref) path = OscPaths.Monitoring.RecallReferenceVolume()
 				const args: OSCMetaArgument = { type: 'f', value: volume }
 				await self.sendMessage(path, args)
@@ -210,13 +283,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Input',
 					default: 1,
 					min: 1,
-					max: 0xff,
+					max: 0x20,
 					range: true,
 					step: 1,
 				},
 			],
 			callback: async (event, _context) => {
-				const args: OSCMetaArgument = { type: 'i', value: Math.floor(Number(event.options.input) - 1) }
+				const args: OSCMetaArgument = { type: 'i', value: Math.floor(event.options.input - 1) }
 				await self.sendMessage(OscPaths.Monitoring.SelectInput(), args)
 			},
 		},
@@ -229,13 +302,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Output',
 					default: 1,
 					min: 1,
-					max: 0xff,
+					max: 0x20,
 					range: true,
 					step: 1,
 				},
 			],
 			callback: async (event, _context) => {
-				const args: OSCMetaArgument = { type: 'i', value: Math.floor(Number(event.options.output) - 1) }
+				const args: OSCMetaArgument = { type: 'i', value: Math.floor(event.options.output - 1) }
 				await self.sendMessage(OscPaths.Monitoring.SelectOutput(), args)
 			},
 		},
@@ -258,11 +331,8 @@ export function UpdateActions(self: ModuleInstance): void {
 				},
 			],
 			callback: async (event, _context) => {
-				const args: OSCMetaArgument = { type: 'f', value: Math.floor(Number(event.options.gain)) }
-				await self.sendMessage(
-					OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : Number(event.options.appId)),
-					args,
-				)
+				const args: OSCMetaArgument = { type: 'f', value: Math.floor(event.options.gain) }
+				await self.sendMessage(OscPaths.Talkback.SetMicGain(event.options.all ? 'all' : event.options.appId), args)
 			},
 		},
 		[ActionId.TalkbackEnable]: {
@@ -270,7 +340,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			options: [ApplicationIdOption, ApplicationIdPlaceholderOption, AllApplicationsOption, EnableOption],
 			callback: async (event, _context) => {
 				const args: OSCMetaArgument = { type: 's', value: String(event.options.enable) }
-				await self.sendMessage(OscPaths.Talkback.Enable(event.options.all ? 'all' : Number(event.options.appId)), args)
+				await self.sendMessage(OscPaths.Talkback.Enable(event.options.all ? 'all' : event.options.appId), args)
 			},
 		},
 		[ActionId.DevicePhantomPower]: {
@@ -289,5 +359,5 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 	}
-	self.setActionDefinitions(actions)
+	return actions
 }

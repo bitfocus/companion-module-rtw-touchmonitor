@@ -1,4 +1,4 @@
-import type { OSCMetaArgument } from '@companion-module/base/dist'
+import type { OSCMetaArgument } from '@companion-module/base'
 
 export function isOSCMetaArgument(arg: unknown): arg is OSCMetaArgument {
 	if (typeof arg !== 'object' || arg === null) return false

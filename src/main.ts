@@ -1,20 +1,17 @@
-import {
-	InstanceBase,
-	runEntrypoint,
-	InstanceStatus,
-	SomeCompanionConfigField,
-	OSCSomeArguments,
-} from '@companion-module/base'
+import { InstanceBase, InstanceStatus, SomeCompanionConfigField, OSCSomeArguments } from '@companion-module/base'
 import { GetConfigFields, type ModuleConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { StatusManager } from './status.js'
+import type { InstanceBaseExt, RtwTypes } from './types.js'
 import PQueue from 'p-queue'
 
-export class ModuleInstance extends InstanceBase<ModuleConfig> {
-	private config!: ModuleConfig // Setup in init()
+export { UpgradeScripts }
+
+export default class ModuleInstance extends InstanceBase<RtwTypes> implements InstanceBaseExt {
+	config!: ModuleConfig // Setup in init()
 	private statusManager = new StatusManager(this, { status: InstanceStatus.Connecting, message: 'Initialising' }, 2000)
 	private queue = new PQueue({ concurrency: 1, interval: 10, intervalCap: 1 })
 	constructor(internal: unknown) {
@@ -73,16 +70,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 
 	private updateActions(): void {
-		UpdateActions(this)
+		this.setActionDefinitions(UpdateActions(this))
 	}
 
 	private updateFeedbacks(): void {
-		UpdateFeedbacks(this)
+		this.setFeedbackDefinitions(UpdateFeedbacks(this))
 	}
 
 	private updateVariableDefinitions(): void {
 		UpdateVariableDefinitions(this)
 	}
 }
-
-runEntrypoint(ModuleInstance, UpgradeScripts)

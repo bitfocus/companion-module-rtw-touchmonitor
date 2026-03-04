@@ -1,6 +1,6 @@
 {
 	"name": "rtw-touchmonitor",
-	"version": "0.3.6",
+	"version": "1.0.0",
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
@@ -23,12 +23,12 @@
 		"yarn": "^4"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.14.1",
+		"@companion-module/base": "~2.0.0",
 		"es-toolkit": "^1.45.0",
 		"p-queue": "^9.1.0"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^2.7.1",
+		"@companion-module/tools": "^3.0.0",
 		"@types/node": "^22.19.13",
 		"eslint": "^9.39.3",
 		"husky": "^9.1.7",

@@ -1,7 +1,10 @@
 import { CompanionFeedbackDefinitions } from '@companion-module/base'
-import type { ModuleInstance } from './main.js'
+import type ModuleInstance from './main.js'
 
-export function UpdateFeedbacks(self: ModuleInstance): void {
-	const feedbacks: CompanionFeedbackDefinitions = {}
-	self.setFeedbackDefinitions(feedbacks)
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type FeedbackSchema = {}
+
+export function UpdateFeedbacks(_self: ModuleInstance): CompanionFeedbackDefinitions<FeedbackSchema> {
+	const feedbacks: CompanionFeedbackDefinitions<FeedbackSchema> = {}
+	return feedbacks
 }

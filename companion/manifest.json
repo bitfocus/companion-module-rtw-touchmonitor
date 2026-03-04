@@ -1,6 +1,7 @@
 {
 	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
 	"id": "rtw-touchmonitor",
+	"type": "connection",
 	"name": "rtw-touchmonitor",
 	"shortname": "TouchMonitor",
 	"description": "OSC Control of RTW TM series",

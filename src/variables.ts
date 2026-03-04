@@ -1,7 +1,8 @@
-import { CompanionVariableDefinition } from '@companion-module/base'
-import type { ModuleInstance } from './main.js'
+import type ModuleInstance from './main.js'
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type VariableSchema = {}
 
 export function UpdateVariableDefinitions(self: ModuleInstance): void {
-	const variableDefs: CompanionVariableDefinition[] = []
-	self.setVariableDefinitions(variableDefs)
+	self.setVariableDefinitions({})
 }
