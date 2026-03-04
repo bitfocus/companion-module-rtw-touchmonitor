@@ -181,12 +181,13 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 						{ id: 'reset', label: 'Reset' },
 					],
 					default: 'start',
+					expressionDescription: 'Must return start, stop or reset',
 				},
 			],
 			callback: async (event, _context) => {
 				const appId = event.options.all ? 'all' : event.options.appId
 				let path = ''
-				switch (event.options.action) {
+				switch (event.options.action.trim().toLowerCase()) {
 					case 'start':
 						path = OscPaths.Metering.Start(appId)
 						break
@@ -197,7 +198,9 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 						path = OscPaths.Metering.Reset(appId)
 						break
 					default:
-						return
+						throw new Error(
+							`Invalid action option for Loudness Meter - Control: ${event.options.action}\nExpression must return 'start' | 'stop' | 'reset'`,
+						)
 				}
 				await self.sendMessage(path, [])
 			},
@@ -226,6 +229,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					type: 'checkbox',
 					label: 'Reference Volume',
 					default: false,
+					disableAutoExpression: true,
 				},
 			],
 			callback: async (event, _context) => {
