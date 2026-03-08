@@ -104,6 +104,7 @@ const ApplicationIdOption = {
 	isVisibleExpression: '!$(options:all)',
 	range: true,
 	step: 1,
+	asInteger: true,
 } as const satisfies CompanionInputFieldNumber
 
 const ApplicationIdPlaceholderOption = {
@@ -147,6 +148,8 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					range: true,
 					step: 1,
 					description: 'Default preset is 0',
+					asInteger: true,
+					clampValues: true,
 				},
 				{
 					id: 'name',
@@ -223,6 +226,8 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					min: -0xff,
 					max: 0xff,
 					isVisibleExpression: '!$(options:ref)',
+					asInteger: false,
+					clampValues: true,
 				},
 				{
 					id: 'placeholder',
@@ -298,6 +303,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					max: 0x20,
 					range: true,
 					step: 1,
+					asInteger: true,
 				},
 			],
 			callback: async (event, _context) => {
@@ -317,6 +323,7 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					max: 0x20,
 					range: true,
 					step: 1,
+					asInteger: true,
 				},
 			],
 			callback: async (event, _context) => {
@@ -340,6 +347,8 @@ export function UpdateActions(self: ModuleInstance): CompanionActionDefinitions<
 					range: true,
 					step: 0.1,
 					description: 'Range: -12 to +12 dB',
+					asInteger: false,
+					clampValues: true,
 				},
 			],
 			callback: async (event, _context) => {
