@@ -426,12 +426,11 @@ const MonitoringSpeakerIndexOption = {
 	label: 'Speaker',
 	default: 1,
 	min: 1,
-	max: 16,
+	max: 32,
 	range: true,
 	step: 1,
 	asInteger: true,
-	description:
-		"Speaker channel within the selected output (doc doesn't state an upper bound; sized for up to 16 channels)",
+	description: 'Speaker channel within the selected output',
 } as const satisfies CompanionInputFieldNumber
 
 const MonitoringBandIndexOption = {
