@@ -41,3 +41,19 @@ export function assertOSCMetaArgument(arg: unknown): asserts arg is OSCMetaArgum
 			throw new TypeError(`Unknown OSC type tag: "${type}"`)
 	}
 }
+
+/**
+ * Parses a comma-separated string of integers (e.g. a routing array field) into a number array.
+ * Throws if any entry is not a valid integer.
+ */
+export function parseIntArray(input: string): number[] {
+	return input
+		.split(',')
+		.map((entry) => entry.trim())
+		.filter((entry) => entry.length > 0)
+		.map((entry) => {
+			const value = Number(entry)
+			if (!Number.isInteger(value)) throw new Error(`Invalid routing value: "${entry}". Expected an integer.`)
+			return value
+		})
+}
